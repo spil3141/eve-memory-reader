@@ -7,6 +7,7 @@ from twilio.rest import Client
 
 from .bots.autopilot import AutoPilotBot
 from .bots.mining import MiningBot
+from .bots.sandbox import SandboxBot
 
 
 account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
@@ -20,7 +21,7 @@ if twilio_configured:
 
 class BotDriver(object):
 
-    registered_bots = {"AutoPilotBot": AutoPilotBot, "MiningBot": MiningBot}
+    registered_bots = {"AutoPilotBot": AutoPilotBot, "MiningBot": MiningBot, "SandboxBot": SandboxBot}
 
     def __init__(
         self,

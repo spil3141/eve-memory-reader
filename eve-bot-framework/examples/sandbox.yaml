@@ -1,0 +1,11 @@
+{
+  "name": "EVE Online - Sandbox Bot",
+  "uses": "SandboxBot",
+  "with_narration": true,
+  "focus": true,
+  "loop": false,
+  "args": {},
+  "steps": [
+    "go"
+  ]
+}
