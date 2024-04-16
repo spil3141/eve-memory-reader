@@ -39,7 +39,7 @@ class AutoPilotBot(Bot):
                 def jump():
                     jump_btn = self.wait_for(
                         {"_setText": "Jump through stargate"},
-                        type="EveLabelMedium",
+                        type="TextBody",
                         until=5,
                     )
 

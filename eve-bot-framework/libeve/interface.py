@@ -55,7 +55,8 @@ class UITree(object):
         for child in tree.get("children", list()):
             real_x = x + (child["attrs"].get("_displayX", 0) or 0)
             real_y = y + (child["attrs"].get("_displayY", 0) or 0)
-            self.ingest(child, real_x, real_y, tree["address"])
+            # self.ingest(child, real_x, real_y, tree["address"])
+            self.ingest(child, real_x, real_y, node.address)  # Corrected parent assignment
 
     def load(self, tree):
         self.nodes = dict()
@@ -99,7 +100,7 @@ class UITree(object):
     ):
         self.refresh()
         nodes = list()
-
+        
         for _, node in self.nodes.items():
             if address and node.address != address:
                 continue
