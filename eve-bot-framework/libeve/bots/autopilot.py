@@ -1,4 +1,5 @@
 from asyncio.windows_events import NULL
+from operator import contains
 import time
 
 from libeve.bots import Bot
@@ -54,11 +55,16 @@ class AutoPilotBot(Bot):
             if not dock_btn:
                 return -1
 
-            self.say("docking")
-            self.click_node(dock_btn)
-            self.wait_for({"_setText": "Establishing Warp Vector"}, until=5)
-            self.wait_until_warp_finished()
-            self.wait_for_overview()
+            self.say("docking ...")
+            
+            x,y = self.click_node(dock_btn)
+            self.say(f"Left clicked on Dock button at {x},{y} ...")
+            
+            _ = self.wait_for({"_setText": "Establishing Warp Vector"}, until=5)
+            if _:
+                self.wait_until_warp_finished()
+            else:
+                self.say("Could not find Establishing Warp Vector text ...")
 
         def jump_or_dock():
             self.say("Looking for route ...")
@@ -91,7 +97,6 @@ class AutoPilotBot(Bot):
                 else:
                     jump()
                     return
-                
                 count += 1
                 
         def check_if_docked():
@@ -107,11 +112,18 @@ class AutoPilotBot(Bot):
                 
         def take_action():
             self.say("Obversing environment ...")
-                    
+            
+            route = self.wait_for( {"_name": "markersParent"}, type="Container", until=15)
+
+            if not route:
+                self.say("No route found ...")
+                return;
+
             is_docked, undock_btn = check_if_docked()
             if is_docked:
                 self.say("Undocking ...")
-                self.click_node(undock_btn)
+                x,y = self.click_node(undock_btn)
+                self.say(f"Left clicked on Undock button at {x},{y} ...")
                 time.sleep(10)
             else:
                 jump_or_dock()

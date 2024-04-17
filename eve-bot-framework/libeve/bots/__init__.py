@@ -202,7 +202,7 @@ class Bot(object):
             self.say("warp drive disengaged")
             time.sleep(5)
         else:
-            self.say("Could not find warp drive active text ...")
+            self.say("Could not find Warp Drive Active text ...")
 
     def wait_until_jump_finished(self):
         self.wait_for({"_setText": "Jumping"})
