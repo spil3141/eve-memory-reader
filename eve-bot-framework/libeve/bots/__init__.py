@@ -185,7 +185,7 @@ class Bot(object):
         return node
 
     def undock(self):
-        undock_btn = self.wait_for({"_setText": "Undock"}, type="LabelThemeColored")
+        undock_btn = self.wait_for({"_setText": "Undock"}, type="EveLabelMedium")
         self.say("undocking")
         self.click_node(undock_btn)
         self.wait_for_overview()
@@ -194,12 +194,15 @@ class Bot(object):
         self.wait_for({"_setText": "Overview"}, type="EveLabelSmall", contains=True)
 
     def wait_until_warp_finished(self):
-        self.wait_for({"_setText": "Warp Drive Active"})
-        self.say("warp drive active")
-        while self.tree.find_node({"_setText": "Warp Drive Active"}):
-            time.sleep(2)
-        self.say("warp drive disengaged")
-        time.sleep(5)
+        _ = self.wait_for({"_setText": "Warp Drive Active"})
+        if _:
+            self.say("warp drive active")
+            while self.tree.find_node({"_setText": "Warp Drive Active"}):
+                time.sleep(2)
+            self.say("warp drive disengaged")
+            time.sleep(5)
+        else:
+            self.say("Could not find warp drive active text ...")
 
     def wait_until_jump_finished(self):
         self.wait_for({"_setText": "Jumping"})
