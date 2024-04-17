@@ -13,7 +13,7 @@ int main()
 	read_ui_trees();
 	UITreeJson = get_ui_json();
 
-	save_to_file_as_json("ui_tree_1.json", UITreeJson);
+	save_to_file_as_json("res/Samples/sample_docked_in_station.json", UITreeJson);
 
 	system("pause");
 

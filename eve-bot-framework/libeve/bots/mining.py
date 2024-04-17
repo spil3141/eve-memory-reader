@@ -807,3 +807,60 @@ class MiningBot(Bot):
             if self.deploy_drones_while_mining:
                 self.deploy_drones()
             self.mine_asteroid()
+    
+    def dock(self):
+        dock_btn = self.wait_for(
+            {"_setText": "Dock"}, type="TextBody", until=5
+        )
+
+        if not dock_btn:
+            return -1
+
+        self.say("docking ...")
+            
+        x,y = self.click_node(dock_btn)
+        self.say(f"Left clicked on Dock button at {x},{y} ...")
+            
+        _ = self.wait_for({"_setText": "Establishing Warp Vector"}, until=5)
+        if _:
+            self.wait_until_warp_finished()
+        else:
+            self.say("Could not find Establishing Warp Vector text ...")
+                
+    def check_if_docked(self):
+        undock_btn = self.wait_for(
+            {"_setText": "Undock"}, type="EveLabelMedium", until=5
+        )
+        if undock_btn:
+            self.say("Ship is docked ...")
+            return (True, undock_btn)
+        else:
+            self.say("Ship is not docked ...")
+            return (False, None)
+
+    def go(self):
+
+        def take_action():
+            self.say("Obversing environment ...")
+            
+            is_docked, undock_btn = self.check_if_docked()
+            if is_docked:
+                
+                # Step 1: Repair ship
+                self.say("Repairing ship ...")
+                self.repair()
+                
+                # Step 2: Move Ore from Ship hanger to item hanger
+                self.say("Moving ore from ship hanger to item hanger ...")
+                
+                # Step 3: Undock
+                self.say("Undocking ...")
+                x,y = self.click_node(undock_btn)
+                self.say(f"Left clicked on Undock button at {x},{y} ...")
+                
+                time.sleep(10)
+            else:
+                self.mine_asteroids()
+
+        while True:
+            take_action()

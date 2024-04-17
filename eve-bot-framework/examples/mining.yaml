@@ -4,7 +4,7 @@
   "with_narration": true,
   "focus": true,
   "loop": true,
-  "start_from": "mine_asteroids",
+  "start_from": "go",
   "scanners": [
     "EnemyScanner"
   ],
@@ -20,6 +20,7 @@
     ]
   },
   "steps": [
+    "go",
     "fleetup",
     "mine_asteroids",
     "compress"
