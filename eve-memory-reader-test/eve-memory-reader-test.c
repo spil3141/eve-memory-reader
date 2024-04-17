@@ -11,22 +11,20 @@ int main()
 	initialize();
 
 	read_ui_trees();
-
 	UITreeJson = get_ui_json();
 
 	save_to_file_as_json("ui_tree_1.json", UITreeJson);
 
 	system("pause");
 
-	read_ui_trees();
+	//read_ui_trees();
+	//UITreeJson = get_ui_json();
 
-	UITreeJson = get_ui_json();
-	
-	save_to_file_as_json("ui_tree_2.json", UITreeJson);
+	//save_to_file_as_json("ui_tree_2.json", UITreeJson);
 
-	free_ui_json();
+	//free_ui_json();
 
-	system("pause");
+	//system("pause");
 }
 
 int save_to_file_as_json(const char* file_name, const char* json)

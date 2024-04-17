@@ -52,7 +52,7 @@ class AutoPilotBot(Bot):
 
                 def dock():
                     dock_btn = self.wait_for(
-                        {"_setText": "Dock"}, type="EveLabelMedium", until=5
+                        {"_setText": "Dock"}, type="TextBody", until=5
                     )
 
                     if not dock_btn:
