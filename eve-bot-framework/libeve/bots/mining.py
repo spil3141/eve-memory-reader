@@ -257,16 +257,19 @@ class MiningBot(Bot):
 
             itemIndex = 0
             for item in items_to_repair:
-                self.say(f"Selecting item {itemIndex + 1} ...")
+                self.say(f"Handling item number {itemIndex + 1} ...")
                 x,y = self.click_node(item)
-                itemIndex += 1
+                self.say(f"Left clicked on item {itemIndex + 1} at {x},{y} ...")
 
-                self.say("Clicking repair button ...")
+                self.say("Looking for Repair Item button ...")
                 repair_item_btn = self.wait_for({"_name" : "repairEntry1"}, until=5)#self.wait_for({"_setText": "Repair Item"}, until=5)
                 if repair_item_btn:
-                    self.click_node(repair_item_btn)
+                    x,y = self.click_node(repair_item_btn)
+                    self.say(f"Left clicked on Repair Item button at {x},{y} ...")
                 else:
                     self.say("Could not find Repair Item button ...")
+                
+                itemIndex += 1
             
         else:
             self.say("Repair list empty ...")
