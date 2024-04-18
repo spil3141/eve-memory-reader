@@ -241,25 +241,35 @@ class MiningBot(Bot):
             break
 
     def repair(self):
-        self.say("repairing ship")
-        repair_facilities = self.wait_for({"_setText": "Repair Facilities"}, until=5)
-        if not repair_facilities:
-            repair_btn = self.wait_for({"_name": "repairshop"})
-            self.click_node(
-                repair_btn,
-                expect=[
-                    {"_setText": "Repair Facilities"},
-                ],
-            )
-        items_to_repair = self.wait_for(
-            {"_name": "entryLabel"}, select_many=True, until=5
-        )
-        if not items_to_repair:
-            return
-        for item in items_to_repair:
-            self.click_node(item)
-        repair_item_btn = self.wait_for({"_setText": "Repair Item"})
-        self.click_node(repair_item_btn)
+        
+        repair_btn = self.wait_for({"_name": "repairshop"})
+        if repair_btn:
+            x,y = self.click_node(repair_btn)
+            self.say(f"Left clicked on Repair button at {x},{y} ...")
+            
+        items_to_repair = self.wait_for({"_name": "entryLabel"}, select_many=True, until=5)
+        if items_to_repair:
+            count = 0
+            for _ in items_to_repair:
+                count += 1
+
+            self.say(f"{count} repairable items found ...")
+
+            itemIndex = 0
+            for item in items_to_repair:
+                self.say(f"Selecting item {itemIndex + 1} ...")
+                x,y = self.click_node(item)
+                itemIndex += 1
+
+                self.say("Clicking repair button ...")
+                repair_item_btn = self.wait_for({"_name" : "repairEntry1"}, until=5)#self.wait_for({"_setText": "Repair Item"}, until=5)
+                if repair_item_btn:
+                    self.click_node(repair_item_btn)
+                else:
+                    self.say("Could not find Repair Item button ...")
+            
+        else:
+            self.say("Repair list empty ...")
 
     def warp_to_asteroid_belt(self):
         while True:
