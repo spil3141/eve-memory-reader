@@ -285,8 +285,17 @@ class MiningBot(Bot):
             
             # Click the List items in solar system button
             items_in_solar_system_btn = self.wait_for({"_hint": "List items in solar system"}, type="ListSurroundingsBtn", until= 5)
-            if not items_in_solar_system_btn:
-                self.say("Could not find List items in solar system button ...")
+            if items_in_solar_system_btn:
+                x,y = self.click_node(
+                    items_in_solar_system_btn,
+                    times=1,
+                    expect=[{"_name": "Asteroid Belts"}],
+                    expect_args={"type": "MenuEntryView", 
+                                 "until": "5"},
+                )
+                self.say(f"Left clicked on Asteroid Belts tab at {x},,{y} ...")
+            else:
+                self.say("Could not find List items or Asteroid Belts in this system ...")
                 return 
             
             # Click "Asteroid Belts" tab

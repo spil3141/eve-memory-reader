@@ -191,7 +191,7 @@ class Bot(object):
         self.wait_for_overview()
 
     def wait_for_overview(self, until = 10):
-        return self.wait_for({"_setText": "Overview"}, type="EveLabelSmall", contains=True, until = until)
+        return self.wait_for({"_setText": "Overview"}, type="Label", contains=True, until = until)
 
     def wait_until_warp_finished(self):
         _ = self.wait_for({"_setText": "Warp Drive Active"})
