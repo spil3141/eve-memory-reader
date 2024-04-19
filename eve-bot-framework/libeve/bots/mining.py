@@ -295,8 +295,7 @@ class MiningBot(Bot):
                     items_in_solar_system_btn,
                     times=1,
                     expect=[{"_name": "Asteroid Belts"}],
-                    expect_args={"type": "MenuEntryView", 
-                                 "until": "5"},
+                    expect_args={"type": "MenuEntryView"},
                 )
                 self.say(f"Left clicked on Asteroid Belts tab at {x},,{y} ...")
             else:
