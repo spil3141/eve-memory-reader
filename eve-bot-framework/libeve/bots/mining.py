@@ -291,12 +291,7 @@ class MiningBot(Bot):
 
             items_in_solar_system_btn = self.wait_for({"_hint": "List items in solar system"}, type="ListSurroundingsBtn", until= 5)
             if items_in_solar_system_btn:
-                x,y = self.click_node(
-                    items_in_solar_system_btn,
-                    times=1,
-                    expect=[{"_name": "Asteroid Belts"}],
-                    expect_args={"type": "MenuEntryView"},
-                )
+                x,y = self.click_node(items_in_solar_system_btn)
                 self.say(f"Left clicked on Asteroid Belts tab at {x},,{y} ...")
             else:
                 self.say("Could not find List items or Asteroid Belts in this system ...")
@@ -304,14 +299,12 @@ class MiningBot(Bot):
             
             # Click "Asteroid Belts" tab
             self.say("Clicking the Asteroid Bels tab ...")
-            asteroid_belt_tab = self.wait_for({"_name": "Asteroid Belts"}, type="MenuEntryView", until= 5)
+            asteroid_belt_tab = self.wait_for({"_setText": "Asteroid Belts"}, type="TextBody", until= 5)
             
             if asteroid_belt_tab:
                 x,y = self.click_node(
                     asteroid_belt_tab,
-                    times=2,
-                    expect=[{"_setText": " - Asteroid Belt "}],
-                    expect_args={"contains": True, "type": "TextBody"},
+                    times=2
                 )
                 self.say(f"Left clicked on Asteroid Belts tab at {x},{y} ...")
             else:
@@ -340,22 +333,33 @@ class MiningBot(Bot):
                     self.visited_asteroid_belts.append(belt.attrs["_setText"])
                     asteroid_belt = belt
                     break
+                
+                # if we've visited all belts, reset the list
+                if len(self.visited_asteroid_belts) == len(asteroid_belts):
+                    self.visited_asteroid_belts = []
+                    break
+                 
 
             if not asteroid_belt:
                 self.say("No more asteroid belts found ...")
                 return -1
-
+            
             x,y = self.click_node(asteroid_belt)
-            self.say(f"Left clicked on Asteroid Belt target at {x},{y} ...")
+            self.say(f"Warping to asteroid belt at 0 km. clicked at {x},{y} ...")
 
-            warpto_btn = self.wait_for(
-                {"_name": "selectedItemWarpTo"}, type="Container"
-            )
+            # warpto_btn = self.wait_for({"_name": "selectedItemWarpTo"}, type="Container", until=5)
+            
+            # if not warpto_btn:
+            #     self.say("Could not find Warp To button ...")
+            #     return
 
-            self.click_node(warpto_btn)
+            # x,y = self.click_node(warpto_btn)
+            
+            # self.say(f"Warping to {asteroid_belt}. click at {x},{y} ...")
 
             if self.wait_for({"_setText": "Establishing Warp Vector"}, until=5):
                 break
+            
         self.wait_until_warp_finished()
 
     def ensure_inventory_is_open(self):
