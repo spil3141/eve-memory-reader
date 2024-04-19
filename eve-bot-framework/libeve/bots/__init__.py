@@ -185,12 +185,12 @@ class Bot(object):
         return node
 
     def undock(self):
-        undock_btn = self.wait_for({"_setText": "Undock"}, type="EveLabelMedium")
-        self.say("undocking")
+        undock_btn = self.wait_for({"_setText": "Undock"}, type="EveLabelMedium", until=5)
+        self.say("Undocking ...")
         self.click_node(undock_btn)
         self.wait_for_overview()
 
-    def wait_for_overview(self, until = 10):
+    def wait_for_overview(self, until = 5):
         return self.wait_for({"_setText": "Overview"}, type="Label", contains=True, until = until)
 
     def wait_until_warp_finished(self):

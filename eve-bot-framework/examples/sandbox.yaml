@@ -3,9 +3,25 @@
   "uses": "SandboxBot",
   "with_narration": true,
   "focus": true,
-  "loop": false,
-  "args": {},
+  "loop": true,
+  "start_from": "go",
+  "scanners": [
+    "EnemyScanner"
+  ],
+  "args": {
+    "deploy_drones_while_mining": false,
+    "station": "Ikuchi VI - Moon 15 - Ytiri Storage",
+    "number_of_miners": 2,
+    "shields": "ALT1",
+    "fleet_commander": "Tacos Los Toritos",
+    "asteroids_of_interest": [
+        "Veldspar",
+        "Scordite"
+    ]
+  },
   "steps": [
     "go"
+  ],
+  "emergency_steps": [
   ]
 }

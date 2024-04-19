@@ -3,12 +3,10 @@ from libeve import KEYMAP
 from libeve.bots import Bot
 from libeve.interface import UITreeNode
 
-
 import string
 import random
 import time
 import traceback
-
 
 class MiningBot(Bot):
     def __init__(
@@ -47,7 +45,51 @@ class MiningBot(Bot):
         self.current_asteroid = None
         self.asteroids_mined = 0
         self.shields_enabled = False
+    
+    def go(self):
+        def take_action():
+            self.say("Obversing environment ...")
+            
+            is_docked, undock_btn = self.check_if_docked()
+            if is_docked:
+                
+                # Step 1: Repair ship
+                # self.say("Repairing ship ...")
+                # self.repair()
+                
+                # Step 2: Move Ore from Ship hanger to item hanger
+                # self.say("Moving ore from ship hanger to item hanger ...")
+                
+                # Step 3: Undock
+                self.undock()
+            
+            at_an_asteroid_belt = self.check_if_at_asteroid_belt()
+            if not at_an_asteroid_belt:
+                self.warp_to_asteroid_belt()
+            else:
+                self.mine_asteroids()
 
+        while True:
+            take_action()
+    
+    def check_if_docked(self):
+        undock_btn = self.wait_for(
+            {"_setText": "Undock"}, type="EveLabelMedium", until=5
+        )
+        if undock_btn:
+            self.say("Ship is docked ...")
+            return (True, undock_btn)
+        else:
+            self.say("Ship is not docked ...")
+            return (False, None)
+  
+    def check_if_at_asteroid_belt(self):
+        for ore_type in self.asteroids_of_interest:
+            if self.wait_for({"_text": ore_type}, type="OverviewLabel", contains=True, until= 5):
+                self.say(f"Found {ore_type} in the overview ...")
+                return True
+        return False
+    
     def new_trip(self):
         self.trip_id = "".join(random.choice(string.ascii_letters) for i in range(32))
 
@@ -347,16 +389,6 @@ class MiningBot(Bot):
             x,y = self.click_node(asteroid_belt)
             self.say(f"Warping to asteroid belt at 0 km. clicked at {x},{y} ...")
 
-            # warpto_btn = self.wait_for({"_name": "selectedItemWarpTo"}, type="Container", until=5)
-            
-            # if not warpto_btn:
-            #     self.say("Could not find Warp To button ...")
-            #     return
-
-            # x,y = self.click_node(warpto_btn)
-            
-            # self.say(f"Warping to {asteroid_belt}. click at {x},{y} ...")
-
             if self.wait_for({"_setText": "Establishing Warp Vector"}, until=5):
                 break
             
@@ -365,31 +397,53 @@ class MiningBot(Bot):
     def ensure_inventory_is_open(self):
 
         inv_label = self.wait_for(
-            {"_setText": "Inventory"}, type="EveLabelSmall", until=5
+            {"_setText": "Inventory"}, until=5
         )
 
         if not inv_label:
 
-            inv_btn = self.wait_for({"_name": "inventory"}, type="ButtonInventory")
+            inv_btn = self.wait_for({"_name": "inventory"}, type="ButtonInventory", until=5)
 
             if not inv_btn:
-                raise Exception("failed to find inventory button")
+                self.say("failed to find inventory button ...")
 
-            self.click_node(
-                inv_btn,
-                expect=[{"_setText": "Inventory"}],
-                expect_args={"type": "EveLabelSmall"},
+            x,y = self.click_node(inv_btn)
+            
+            self.say(f"Left clicked on Inventory button at {x},{y} ...")
+            
+            inv_label = self.wait_for(
+                {"_setText": "Inventory"}, until=5
             )
+            
+            if inv_label:
+                return True
+        else:
+            return True
+        
+        return False
+            
+
 
     def ensure_mining_hold_is_open(self):
-        self.ensure_inventory_is_open()
-        mining_hold = self.wait_for({"_setText": "Mining Hold"}, type="Label", until=10)
+        is_open = self.ensure_inventory_is_open()
+        
+        if is_open:
 
-        if not mining_hold:
-            raise Exception("failed to find mining hold")
+            mining_hold = self.wait_for({"_setText": "Mining Hold"}, type="Label", until=10)
 
-        time.sleep(3)
-        self.click_node(mining_hold, times=2)
+            if not mining_hold:
+                raise Exception("failed to find mining hold")
+
+            time.sleep(3)
+            x,y = self.click_node(mining_hold, times=2)
+            
+            self.say(f"opening Mining Hold at {x},{y} ...")
+            
+            return True
+        else:
+            return False
+        
+        return False
 
     def ensure_cargo_is_open(self):
         self.ensure_inventory_is_open()
@@ -545,7 +599,7 @@ class MiningBot(Bot):
 
         self.wait_for_overview()
 
-        mining_tab = self.wait_for({"_setText": "Mining"}, type="LabelThemeColored")
+        mining_tab = self.wait_for({"_setText": "Mining"}, type="EveLabelMedium")
 
         self.click_node(mining_tab, times=2)
 
@@ -831,34 +885,47 @@ class MiningBot(Bot):
             retries += 1
             time.sleep(2)
 
-    def cargo_is_full(self):
-        self.say("checking cargo")
-        self.ensure_mining_hold_is_open()
-        cap_gauge = self.wait_for(type="InvContCapacityGauge")
-        cap_node_id = cap_gauge.children[0]
-        cap_node = self.tree.nodes[cap_node_id]
-        cap_str = cap_node.attrs.get("_setText", "0/0 m").strip()
-        self.say(f"capacity at: {cap_str}", narrate=False)
-        ratio_str, _ = cap_str.split(" ")
-        try:
-            ratio = eval(ratio_str.replace(",", ""))
-            return ratio > 0.95
-        except ZeroDivisionError:
+    def cargo_is_full(self) -> bool:
+        self.say("checking cargo ...")
+        
+        is_open = self.ensure_mining_hold_is_open()
+        
+        if is_open:
+            cap_gauge = self.wait_for(type="InvContCapacityGauge")
+            cap_node_id = cap_gauge.children[0]
+            cap_node = self.tree.nodes[cap_node_id]
+            cap_str = cap_node.attrs.get("_setText", "0/0 m").strip()
+            self.say(f"capacity at: {cap_str}", narrate=False)
+            ratio_str, _ = cap_str.split(" ")
+            try:
+                ratio = eval(ratio_str.replace(",", ""))
+                return ratio > 0.95
+            except ZeroDivisionError:
+                return False
+        else:
             return False
 
     def mine_asteroids(self):
+        
+        self.say("[at asteroid belt] Starting mining coroutine ...")
+
         if self.trip_id == "":
             self.new_trip()
+            
         if self.deploy_drones_while_mining:
             self.deploy_drones()
+            
         if self.shields:
             self.enable_shields()
+            
         while not self.cargo_is_full():
-            if self.find_asteroid() == -1:
-                break
-            if self.deploy_drones_while_mining:
-                self.deploy_drones()
-            self.mine_asteroid()
+            self.say("Cargo is not full, mining asteroid ...")
+            # if self.find_asteroid() == -1:
+            #     break
+            # if self.deploy_drones_while_mining:
+            #     self.deploy_drones()
+            # self.mine_asteroid()
+            pass
     
     def dock(self):
         dock_btn = self.wait_for(
@@ -878,41 +945,3 @@ class MiningBot(Bot):
             self.wait_until_warp_finished()
         else:
             self.say("Could not find Establishing Warp Vector text ...")
-                
-    def check_if_docked(self):
-        undock_btn = self.wait_for(
-            {"_setText": "Undock"}, type="EveLabelMedium", until=5
-        )
-        if undock_btn:
-            self.say("Ship is docked ...")
-            return (True, undock_btn)
-        else:
-            self.say("Ship is not docked ...")
-            return (False, None)
-
-    def go(self):
-
-        def take_action():
-            self.say("Obversing environment ...")
-            
-            is_docked, undock_btn = self.check_if_docked()
-            if is_docked:
-                
-                # Step 1: Repair ship
-                # self.say("Repairing ship ...")
-                # self.repair()
-                
-                # Step 2: Move Ore from Ship hanger to item hanger
-                # self.say("Moving ore from ship hanger to item hanger ...")
-                
-                # Step 3: Undock
-                self.say("Undocking ...")
-                x,y = self.click_node(undock_btn)
-                self.say(f"Left clicked on Undock button at {x},{y} ...")
-                
-                time.sleep(10)
-            else:
-                self.warp_to_asteroid_belt()
-
-        while True:
-            take_action()

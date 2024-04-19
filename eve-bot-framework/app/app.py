@@ -20,7 +20,7 @@ file_list_column = [
         sg.Button("Stop", size=(5, 1), disabled=True, key="stop"),
         sg.Button("Stop Safely", size=(10, 1), disabled=True, key="stop_safely"),
     ],
-    [sg.Multiline(enable_events=True, size=(1000, 38), disabled=True, key="bot_log")],
+    [sg.Multiline(enable_events=True, size=(1000, 38), disabled=True, key="bot_log", autoscroll=True)],
     [
         sg.In(
             size=(25, 1),

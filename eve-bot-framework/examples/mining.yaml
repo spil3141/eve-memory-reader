@@ -9,10 +9,9 @@
     "EnemyScanner"
   ],
   "args": {
-    "deploy_drones_while_mining": true,
+    "deploy_drones_while_mining": false,
     "station": "Ikuchi VI - Moon 15 - Ytiri Storage",
     "number_of_miners": 2,
-    "shields": "ALT1",
     "fleet_commander": "Tacos Los Toritos",
     "asteroids_of_interest": [
         "Veldspar",
@@ -20,12 +19,8 @@
     ]
   },
   "steps": [
-    "go",
-    "fleetup",
-    "mine_asteroids",
-    "compress"
+    "go"
   ],
   "emergency_steps": [
-    "warp_to_station"
   ]
 }
