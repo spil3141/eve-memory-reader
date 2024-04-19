@@ -275,15 +275,20 @@ class MiningBot(Bot):
             self.say("Repair list empty ...")
 
     def warp_to_asteroid_belt(self):
+        
         while True:
+            self.say("Finding asteroid belt ...")
+        
             overview_node = self.wait_for_overview(5)
             if not overview_node: 
                 self.say("Could not find Overview tab ...")
                 return
 
-            self.say("Finding asteroid belt ...")
             
             # Click the List items in solar system button
+
+            self.say("Clicking the List items in solar system button ...")
+
             items_in_solar_system_btn = self.wait_for({"_hint": "List items in solar system"}, type="ListSurroundingsBtn", until= 5)
             if items_in_solar_system_btn:
                 x,y = self.click_node(
@@ -299,20 +304,23 @@ class MiningBot(Bot):
                 return 
             
             # Click "Asteroid Belts" tab
+            self.say("Clicking the Asteroid Bels tab ...")
             asteroid_belt_tab = self.wait_for({"_name": "Asteroid Belts"}, type="MenuEntryView", until= 5)
             
-            if not asteroid_belt_tab:
+            if asteroid_belt_tab:
+                x,y = self.click_node(
+                    asteroid_belt_tab,
+                    times=2,
+                    expect=[{"_setText": " - Asteroid Belt "}],
+                    expect_args={"contains": True, "type": "TextBody"},
+                )
+                self.say(f"Left clicked on Asteroid Belts tab at {x},{y} ...")
+            else:
                 self.say("Could not find List items in solar system button ...")
                 return
 
-            x,y = self.click_node(
-                asteroid_belt_tab,
-                times=2,
-                expect=[{"_setText": " - Asteroid Belt "}],
-                expect_args={"contains": True, "type": "TextBody"},
-            )
-            self.say(f"Left clicked on Asteroid Belts tab at {x},{y} ...")
-
+            # Finding astroid belts list
+            self.say("Finding asteroid belts ...")
             asteroid_belts = self.wait_for(
                 {"_setText": " - Asteroid Belt "},
                 select_many=True,
@@ -322,7 +330,9 @@ class MiningBot(Bot):
 
             if not asteroid_belts:
                 self.say("Asteroid belts not found ...")
+                return
 
+            self.say("Selecting the first asteroid belt ...")
             asteroid_belt = None
             for belt in asteroid_belts:
                 if "_setText" not in belt.attrs:
@@ -333,9 +343,11 @@ class MiningBot(Bot):
                     break
 
             if not asteroid_belt:
+                self.say("No more asteroid belts found ...")
                 return -1
 
-            self.click_node(asteroid_belt)
+            x,y = self.click_node(asteroid_belt)
+            self.say(f"Left clicked on Asteroid Belt target at {x},{y} ...")
 
             warpto_btn = self.wait_for(
                 {"_name": "selectedItemWarpTo"}, type="Container"
